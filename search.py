@@ -88,7 +88,6 @@ def depthFirstSearch(problem: SearchProblem):
     print("Start's successors:", problem.getSuccessors(problem.getStartState()))
     """
     "*** YOUR CODE HERE ***"
-
     visited: set = set()
     prev = {}
     stack = util.Stack()
@@ -97,7 +96,6 @@ def depthFirstSearch(problem: SearchProblem):
     prev[problem.getStartState()] = None
 
     while stack:
-
         node = stack.pop()
         visited.add(node) if node not in visited else None
 
@@ -119,12 +117,73 @@ def depthFirstSearch(problem: SearchProblem):
 def breadthFirstSearch(problem: SearchProblem):
     """Search the shallowest nodes in the search tree first."""
     "*** YOUR CODE HERE ***"
-    util.raiseNotDefined()
+    visited = set()
+    prev = {}
+    queue = util.Queue()
+
+    queue.push(problem.getStartState())
+    visited.add(problem.getStartState())
+    prev[problem.getStartState()] = None
+
+    while queue:
+        node = queue.pop()
+
+        if problem.isGoalState(node):
+            actions = []
+            curr = node
+            while prev[curr] != None:
+                actions.append(prev[curr][1])
+                curr = prev[curr][0]
+            actions = actions[::-1]
+            return actions
+        
+        for successor, action, _ in problem.getSuccessors(node):
+            if successor not in visited:
+                queue.push(successor)
+                visited.add(successor)
+                prev[successor] = (node, action)  
+    return []
+
 
 def uniformCostSearch(problem: SearchProblem):
     """Search the node of least total cost first."""
     "*** YOUR CODE HERE ***"
-    util.raiseNotDefined()
+    visited = set()
+    prev = {}
+    pq = util.PriorityQueue()
+
+    pq.push(problem.getStartState(), 0)
+    prev[problem.getStartState()] = (None, None, 0)
+
+    while not pq.isEmpty():
+        node = pq.pop()
+
+        if node in visited:
+            continue
+
+        visited.add(node)
+
+        if problem.isGoalState(node):
+            actions = []
+            curr = node
+            while prev[curr][0] != None:
+                actions.append(prev[curr][1])
+                curr = prev[curr][0]
+            actions = actions[::-1]
+            return actions   
+
+        for successor, action, cost in problem.getSuccessors(node):
+            if successor not in visited:
+                if successor in prev: 
+                    prev_cost = prev[successor][2]
+                    if cost + prev[node][2] < prev_cost:
+                        prev[successor] = (node, action, cost + prev[node][2])   
+                        pq.update(successor, prev[successor][2])
+                else:
+                    prev[successor] = (node, action, cost + prev[node][2])
+                    pq.push(successor, prev[successor][2])
+    return []
+
 
 def nullHeuristic(state, problem=None):
     """
